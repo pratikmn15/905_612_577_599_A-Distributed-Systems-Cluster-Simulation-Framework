@@ -36,7 +36,7 @@ def list_nodes():
 
 # GUI setup
 root = tk.Tk()
-root.title("KubeLite Node Manager")
+root.title("CC KubeProject")
 root.geometry("300x200")
 
 label = tk.Label(root, text="Enter CPU cores:")
