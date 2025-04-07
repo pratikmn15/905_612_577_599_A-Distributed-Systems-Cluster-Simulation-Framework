@@ -1,8 +1,0 @@
-{
-  "N1": {
-    "container": "node_N1",
-    "cpu": 6,
-    "status": "Healthy",
-    "pods": []
-  }
-}
