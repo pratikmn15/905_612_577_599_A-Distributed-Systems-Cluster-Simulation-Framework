@@ -2,26 +2,53 @@ import tkinter as tk
 from tkinter import messagebox
 import requests
 
+API_URL = "http://127.0.0.1:8000"
+
 def add_node():
     try:
-        cpu = int(cpu_entry.get())
-        response = requests.post('http://localhost:5000/add_node', json={'cpu': cpu})
+        cores = entry.get()
+        if not cores:
+            raise ValueError
+        response = requests.post(f"{API_URL}/node/add", json={"cpu_cores": cores})
         if response.status_code == 200:
-            node_id = response.json().get('node_id')
-            messagebox.showinfo('Success', f'Node {node_id} added successfully')
+            messagebox.showinfo("Success", f"Node added!\n{response.json()}")
         else:
-            messagebox.showerror('Error', response.json().get('error'))
+            messagebox.showerror("Error", response.json().get("error", "Unknown error"))
+    except ValueError:
+        messagebox.showwarning("Invalid Input", "Enter a valid number of CPU cores.")
     except Exception as e:
-        messagebox.showerror('Error', str(e))
+        messagebox.showerror("Error", str(e))
 
-app = tk.Tk()
-app.title("Cluster Node Manager")
-app.geometry("300x150")
+def list_nodes():
+    try:
+        response = requests.get(f"{API_URL}/nodes")
+        if response.status_code == 200:
+            nodes = response.json()
+            if nodes:
+                info = "\n".join([f"ID: {k}, Cores: {v['cpu_cores']}, Status: {v['status']}" for k, v in nodes.items()])
+            else:
+                info = "No nodes found."
+            messagebox.showinfo("Registered Nodes", info)
+        else:
+            messagebox.showerror("Error", "Unable to fetch nodes.")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
 
-tk.Label(app, text="CPU Cores:").pack(pady=10)
-cpu_entry = tk.Entry(app)
-cpu_entry.pack()
+# GUI setup
+root = tk.Tk()
+root.title("KubeLite Node Manager")
+root.geometry("300x200")
 
-tk.Button(app, text="Add Node", command=add_node).pack(pady=20)
+label = tk.Label(root, text="Enter CPU cores:")
+label.pack(pady=5)
 
-app.mainloop()
+entry = tk.Entry(root)
+entry.pack(pady=5)
+
+add_btn = tk.Button(root, text="Add Node", command=add_node)
+add_btn.pack(pady=5)
+
+list_btn = tk.Button(root, text="List Nodes", command=list_nodes)
+list_btn.pack(pady=5)
+
+root.mainloop()
